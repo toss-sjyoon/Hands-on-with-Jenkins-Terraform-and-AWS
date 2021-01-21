@@ -18,8 +18,14 @@ data "aws_security_group" "sg" {
   }
 }
 data "aws_subnet_ids" "id"{
+  vpc_id = "value"
   tags = {
     Purpose = "Playground"
     Tier = "private"
+  }
+}
+data "aws_vpc" "vpc"{
+  tags = {
+    Purpose = "Playground"
   }
 }
