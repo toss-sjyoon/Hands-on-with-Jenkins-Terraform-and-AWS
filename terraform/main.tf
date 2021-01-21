@@ -21,7 +21,6 @@ data "aws_subnet_ids" "id"{
   vpc_id = data.aws_vpc.vpc.id
   tags = {
     Purpose = "Playground"
-    Tier = "public"
   }
 }
 data "aws_vpc" "vpc"{
