@@ -3,7 +3,7 @@ data "template_file" "init" {
   template = file("scripts/deploy-react-application.sh.tpl")
 
   vars = {
-    UNIQUE_ANIMAL_IDENTIFIER = "${var.UNIQUE_ANIMAL_IDENTIFIER}"
+    UNIQUE_ANIMAL_IDENTIFIER = var.UNIQUE_ANIMAL_IDENTIFIER
   }
 }
 
