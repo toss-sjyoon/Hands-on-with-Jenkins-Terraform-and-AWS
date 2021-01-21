@@ -21,6 +21,7 @@ data "aws_subnet" "sn"{
   vpc_id = data.aws_vpc.vpc.id
   tags = {
     Purpose = "Playground"
+    count = 0
   }
 }
 data "aws_vpc" "vpc"{
