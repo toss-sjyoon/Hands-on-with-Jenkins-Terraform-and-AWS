@@ -18,7 +18,7 @@ data "aws_security_group" "sg" {
   }
 }
 data "aws_subnet_ids" "id"{
-  vpc_id = data.aws_vpc.id
+  vpc_id = data.aws_vpc.vpc.id
   tags = {
     Purpose = "Playground"
     Tier = "private"
