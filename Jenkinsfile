@@ -23,11 +23,14 @@ pipeline {
             }
         }
         stage("Deploy") {
+            environment {
+                ARTIFACT = sh (returnStdout: true, script: "${aws s3api list-buckets --query \"Buckets[].Name\" | grep -wo \"\\w*playgroundartifact\\w*\"}")
+            }
             steps {
                 script {
                     sh """
                     zip -r $UNIQUE_ANIMAL_IDENTIFIER-build-artifacts.zip build/
-                    aws s3 cp $UNIQUE_ANIMAL_IDENTIFIER-build-artifacts.zip s3://${aws s3api list-buckets --query "Buckets[].Name" | grep -wo "\\w*playgroundartifact\\w*"}
+                    aws s3 cp $UNIQUE_ANIMAL_IDENTIFIER-build-artifacts.zip s3://{ARTIFACT}
                     cd terraform
                     terraform init -backend-config="key=${UNIQUE_ANIMAL_IDENTIFIER}.tfstate"
                     terraform apply --auto-approve
