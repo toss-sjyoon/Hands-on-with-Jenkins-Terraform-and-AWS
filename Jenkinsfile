@@ -24,7 +24,7 @@ pipeline {
         }
         stage("Deploy") {
             environment {
-                ARTIFACT = sh (returnStdout: true, script: "${aws s3api list-buckets --query 'Buckets[].Name' | grep -wo \"\\w*playgroundartifact\\w*\"}")
+                ARTIFACT = sh (returnStdout: true, script: "${aws s3api list-buckets --query 'Buckets[].Name' | grep -wo "\\w*playgroundartifact\\w*"}")
             }
             steps {
                 script {
