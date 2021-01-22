@@ -54,16 +54,6 @@ pipeline {
                 }
             }
         }
-        stage("destroy"){
-            steps{
-                script{
-                    sh"""
-                    cd terraform
-                    terraform destroy -no-color --auto-approve
-                    """
-                }
-            }
-        }
     }
     post {
         cleanup {

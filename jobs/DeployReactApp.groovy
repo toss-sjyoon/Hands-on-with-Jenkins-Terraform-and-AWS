@@ -35,11 +35,6 @@ pipelineJob("Destroy-React-App"){
         numToKeep(20)
     }
     concurrentBuild(allowConcurrentBuild = false)
-    triggers {
-        scm("* * * * *"){
-            ignorePostCommitHooks(ignorePostCommitHooks = false)
-        }
-    }
     parameters {
       stringParam("UNIQUE_ANIMAL_IDENTIFIER", defaultValue = "playground", description = "Your unique animal identifier for this playground!")
     }
