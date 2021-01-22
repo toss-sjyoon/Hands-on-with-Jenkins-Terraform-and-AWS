@@ -4,6 +4,7 @@ data "template_file" "init" {
 
   vars = {
     UNIQUE_ANIMAL_IDENTIFIER = var.UNIQUE_ANIMAL_IDENTIFIER
+    ARTIFACT = var.ARTIFACT
   }
 }
 
