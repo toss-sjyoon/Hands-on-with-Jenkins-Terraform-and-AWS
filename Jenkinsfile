@@ -59,7 +59,7 @@ pipeline {
                 script{
                     sh"""
                     
-                    "terraform destroy --auto-approve"
+                    terraform destroy --auto-approve
                     """
                 }
             }
