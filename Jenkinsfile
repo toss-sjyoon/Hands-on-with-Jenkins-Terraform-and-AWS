@@ -28,12 +28,12 @@ pipeline {
                 """
                 aws s3api list-buckets --query 'Buckets[].Name' | grep -wo "\\w*playgroundartifact\\w*"
                 """
-                )
+                ).trim()
                 TFSTATE = sh (returnStdout: true, script: 
                 """
                 aws s3api list-buckets --query 'Buckets[].Name' | grep -wo "\\w*playgroundtfstate\\w*"
                 """
-                )
+                ).trim()
             }
             steps {
                 script {
