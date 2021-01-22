@@ -9,7 +9,7 @@
         "s3:PutObject"
       ],
       "Effect": "Allow",
-      "Resource": "arn:aws:s3:::dpg-november-artifact-bucket/*"
+      "Resource": "arn:aws:s3:::playground*"
     },
     {
       "Sid": "Stmt1605799546166",
