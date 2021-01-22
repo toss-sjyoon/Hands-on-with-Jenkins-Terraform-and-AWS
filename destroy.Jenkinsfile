@@ -5,7 +5,7 @@ pipeline {
         terraform "terraform"
     }
     stages {
-        stage("Deploy") {
+        stage("Destroy") {
             environment {
                 TFSTATE = sh (returnStdout: true, script: 
                 """
