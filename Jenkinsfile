@@ -42,7 +42,7 @@ pipeline {
                     aws s3 cp $UNIQUE_ANIMAL_IDENTIFIER-build-artifacts.zip s3://${ARTIFACT}
                     cd terraform
                     terraform init -no-color -backend-config="key=${UNIQUE_ANIMAL_IDENTIFIER}.tfstate" -backend-config="bucket=${TFSTATE}"
-                    terraform destroy #REMOVE
+                    terraform destroy --auto-approve #REMOVE
                     terraform apply --auto-approve -no-color -var ARTIFACT=${ARTIFACT}
                     """
                 }
