@@ -41,8 +41,8 @@ pipeline {
                     zip -r $UNIQUE_ANIMAL_IDENTIFIER-build-artifacts.zip build/
                     aws s3 cp $UNIQUE_ANIMAL_IDENTIFIER-build-artifacts.zip s3://${ARTIFACT}
                     cd terraform
-                    terraform init -backend-config="key=${UNIQUE_ANIMAL_IDENTIFIER}.tfstate" -backend-config="bucket=${TFSTATE}"
-                    terraform plan # --auto-approve
+                    terraform init -no-color -backend-config="key=${UNIQUE_ANIMAL_IDENTIFIER}.tfstate" -backend-config="bucket=${TFSTATE}"
+                    terraform apply --auto-approve -no-color
                     """
                 }
             }
@@ -58,7 +58,8 @@ pipeline {
             steps{
                 script{
                     sh"""
-                    terraform destroy --auto-approve
+                    
+                    echo "terraform destroy --auto-approve"
                     """
                 }
             }
