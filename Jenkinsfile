@@ -58,8 +58,8 @@ pipeline {
             steps{
                 script{
                     sh"""
-                    
-                    terraform destroy --auto-approve
+                    cd terraform
+                    terraform destroy -no-color --auto-approve
                     """
                 }
             }
