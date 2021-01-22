@@ -13,7 +13,9 @@
     },
     {
       "Sid": "Stmt1605799546166",
-      "Action": "iam:AttachRolePolicy",
+      "Action": [
+        "iam:AttachRolePolicy"
+      ],
       "Effect": "Allow",
       "Resource": "*"
     }
