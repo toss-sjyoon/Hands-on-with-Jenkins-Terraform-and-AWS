@@ -541,3 +541,7 @@ Click the link to see the deployed website!
 AWS lets you utilise resources such as [Amazon Route 53](https://www.google.com/search?q=route+53+aws&oq=route+53+aws&aqs=chrome..69i57j0l5j69i60l2.3169j0j7&sourceid=chrome&ie=UTF-8) to set up domains to your websites. Check out the link above for the documentation.
 
 Thats all for tonight! Thanks for joining, I hope you enjoyed it!
+
+### 5. Clean up
+
+If you run the Destroy-React-App, It will destroy the AWS infrastructre that the Deploy-React-App pipleline created
