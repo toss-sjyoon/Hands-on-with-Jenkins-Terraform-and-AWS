@@ -106,6 +106,31 @@ pipelineJob("Deploy-React-App"){
     }
   }
 }
+pipelineJob("Destroy-React-App"){
+    description("Destroys a React web application to AWS")
+    logRotator {
+        daysToKeep(5)
+        numToKeep(20)
+    }
+    concurrentBuild(allowConcurrentBuild = false)
+    parameters {
+      stringParam("UNIQUE_ANIMAL_IDENTIFIER", defaultValue = "changeme", description = "Your unique animal identifier for this playground!")
+    }
+    definition {
+    cpsScm {
+      scm {
+        git {
+          branch("master")
+          remote {
+            credentials("${GIT_USER}")
+            url("${GIT_URL}")
+          }
+        }
+      }
+      scriptPath('destroy.Jenkinsfile')
+    }
+  }
+}
 ```
 
 # Whats happening here?
@@ -359,14 +384,26 @@ pipeline {
             }
         }
         stage("Deploy") {
+            environment {
+                ARTIFACT = sh (returnStdout: true, script: 
+                """
+                aws s3api list-buckets --query 'Buckets[].Name' | grep -wo "\\w*playgroundartifact\\w*"
+                """
+                ).trim()
+                TFSTATE = sh (returnStdout: true, script: 
+                """
+                aws s3api list-buckets --query 'Buckets[].Name' | grep -wo "\\w*playgroundtfstate\\w*"
+                """
+                ).trim()
+            }
             steps {
                 script {
                     sh """
                     zip -r $UNIQUE_ANIMAL_IDENTIFIER-build-artifacts.zip build/
-                    aws s3 cp $UNIQUE_ANIMAL_IDENTIFIER-build-artifacts.zip s3://dpg-november-artifact-bucket
+                    aws s3 cp $UNIQUE_ANIMAL_IDENTIFIER-build-artifacts.zip s3://${ARTIFACT}
                     cd terraform
-                    terraform init -backend-config="key=${UNIQUE_ANIMAL_IDENTIFIER}.tfstate"
-                    terraform apply --auto-approve
+                    terraform init -no-color -backend-config="key=${UNIQUE_ANIMAL_IDENTIFIER}.tfstate" -backend-config="bucket=${TFSTATE}"
+                    terraform apply --auto-approve -no-color -var ARTIFACT=${ARTIFACT}
                     """
                 }
             }
@@ -385,6 +422,7 @@ pipeline {
         }
     }
 }
+
 ```
 # What's happening here?
 
