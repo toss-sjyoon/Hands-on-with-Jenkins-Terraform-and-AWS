@@ -1,6 +1,6 @@
 # Terraform Data Blocks
 
-Within the `main.tf` file you will see that we are making use of Terraforms `Data Sources`:
+Within the `main.tf` file you will see that we are making use of Terraform `Data Sources`:
 
 ```
 data "aws_security_group" "sg" {
