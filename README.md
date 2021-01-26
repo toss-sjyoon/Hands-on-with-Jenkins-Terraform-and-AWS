@@ -194,7 +194,7 @@ git clone <FORKED_REPOSITORY>
 cd <FORKED_REPOSITORY>
 ```
 
-2. Open the repository in your text editor (I'm using VS Code) and click on the `DeployReactApp.groovy` script.
+2. Open the repository in your text editor (I'm using VS Code) and click on the `DeployReactApp.groovy` script within the `jobs` directory.
 ![](readme_images/jenkins_dsl.png)
 
 3. Copy the entire script and paste it into the file. Make sure the `defaultValue` of `UNIQUE_ANIMAL_IDENTIFIER` has been changed.
