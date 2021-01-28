@@ -3,7 +3,8 @@ data "template_file" "init" {
   template = file("scripts/deploy-react-application.sh.tpl")
 
   vars = {
-    UNIQUE_ANIMAL_IDENTIFIER = "${var.UNIQUE_ANIMAL_IDENTIFIER}"
+    UNIQUE_ANIMAL_IDENTIFIER = var.UNIQUE_ANIMAL_IDENTIFIER
+    ARTIFACT = var.ARTIFACT
   }
 }
 
@@ -13,7 +14,7 @@ resource "aws_launch_configuration" "lc" {
   instance_type               = "t2.small"
   security_groups             = [var.security_group_id]
   user_data                   = data.template_file.init.rendered
-  key_name                    = "playground-november-key"
+  #key_name                    = "playground-november-key"
   associate_public_ip_address = true
   iam_instance_profile        = aws_iam_instance_profile.deploy_profile.name
 

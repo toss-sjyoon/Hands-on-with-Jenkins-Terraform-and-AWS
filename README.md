@@ -73,7 +73,7 @@ Navigate to the forked repository and click in the `jobs` folder. You should see
 
 For this tutorial I will be using the command line and VS Code, but if you feel more comfortable using the GitHub user interface then feel free to use that.
 
-> IMPORTANT: Make sure you change the UNIQUE_ANIMAL_IDENTIFIER `defaultValue`, "changeme", to whatever your animal identifier is.
+> IMPORTANT: Make sure you change the UNIQUE_ANIMAL_IDENTIFIER `defaultValue`, "changeme", to whatever your animal identifier is within both the `Deploy-React-App` pipeline as well as the `Destroy-React-App` pipeline.
 
 ```
 pipelineJob("Deploy-React-App"){
@@ -103,6 +103,31 @@ pipelineJob("Deploy-React-App"){
         }
       }
       scriptPath('Jenkinsfile')
+    }
+  }
+}
+pipelineJob("Destroy-React-App"){
+    description("Destroys a React web application to AWS")
+    logRotator {
+        daysToKeep(5)
+        numToKeep(20)
+    }
+    concurrentBuild(allowConcurrentBuild = false)
+    parameters {
+      stringParam("UNIQUE_ANIMAL_IDENTIFIER", defaultValue = "changeme", description = "Your unique animal identifier for this playground!")
+    }
+    definition {
+    cpsScm {
+      scm {
+        git {
+          branch("master")
+          remote {
+            credentials("${GIT_USER}")
+            url("${GIT_URL}")
+          }
+        }
+      }
+      scriptPath('destroy.Jenkinsfile')
     }
   }
 }
@@ -154,6 +179,10 @@ Here we are using the `definition {}` block to specify the Git repository. You w
 
 The `scriptPath('')` function defines the file path to the pipeline script that will be used to deploy our application. We'll come back onto this in Section 3
 
+#### h. `pipelineJob("Destory-React-App"){}`
+
+This `pipelineJob(){}` is creating a second pipeline that we will use to destoy the infrastructure we have created. The `scriptPath('')` function here is defining a spearate file path to the `destroy.Jenkinsfile` script.
+
 # How to commit and push to master?
 
 1. If you haven't already done so, clone down your **forked** [react-app-devops-playground](https://github.com/DevOpsPlayground/Hands-on-with-Jenkins-Terraform-and-AWS) repository and cd into it. 
@@ -165,7 +194,7 @@ git clone <FORKED_REPOSITORY>
 cd <FORKED_REPOSITORY>
 ```
 
-2. Open the repository in your text editor (I'm using VS Code) and click on the `DeployReactApp.groovy` script.
+2. Open the repository in your text editor (I'm using VS Code) and click on the `DeployReactApp.groovy` script within the `jobs` directory.
 ![](readme_images/jenkins_dsl.png)
 
 3. Copy the entire script and paste it into the file. Make sure the `defaultValue` of `UNIQUE_ANIMAL_IDENTIFIER` has been changed.
@@ -267,7 +296,8 @@ All of the plugins for this playground have been pre-installed on your Jenkins s
 ![](readme_images/terraform_installation_details.png)
     - Name: **terraform**
     - Install Automatically: (box checked)
-    - Version: **Terraform 00923 linux (amd64)**
+    - Version: please choose the latest stable release. [Click here](https://www.terraform.io/downloads.html) for details.
+
 - Click **Save** which will take you back to the homepage.
 
 ### 4. Configure Jenkins with an AWS region so it knows where to deploy it to. Navigate to:
@@ -359,14 +389,26 @@ pipeline {
             }
         }
         stage("Deploy") {
+            environment {
+                ARTIFACT = sh (returnStdout: true, script: 
+                """
+                aws s3api list-buckets --query 'Buckets[].Name' | grep -wo "\\w*playgroundartifact\\w*" | cut -d" " -f2
+                """
+                ).trim()
+                TFSTATE = sh (returnStdout: true, script: 
+                """
+                aws s3api list-buckets --query 'Buckets[].Name' | grep -wo "\\w*playgroundtfstate\\w*" | cut -d" " -f2
+                """
+                ).trim()
+            }
             steps {
                 script {
                     sh """
                     zip -r $UNIQUE_ANIMAL_IDENTIFIER-build-artifacts.zip build/
-                    aws s3 cp $UNIQUE_ANIMAL_IDENTIFIER-build-artifacts.zip s3://dpg-november-artifact-bucket
+                    aws s3 cp $UNIQUE_ANIMAL_IDENTIFIER-build-artifacts.zip s3://${ARTIFACT}
                     cd terraform
-                    terraform init -backend-config="key=${UNIQUE_ANIMAL_IDENTIFIER}.tfstate"
-                    terraform apply --auto-approve
+                    terraform init -no-color -backend-config="key=${UNIQUE_ANIMAL_IDENTIFIER}.tfstate" -backend-config="bucket=${TFSTATE}"
+                    terraform apply --auto-approve -no-color -var ARTIFACT=${ARTIFACT}
                     """
                 }
             }
@@ -385,6 +427,7 @@ pipeline {
         }
     }
 }
+
 ```
 # What's happening here?
 
@@ -413,6 +456,7 @@ The stages section is where the bulk of the "work" described by a Pipeline will 
 For the "Build" and "Test" stages, we simply execute an `npm` command that will run in the workspace directory.
 
 However for the "Deploy" stage we execute some terraform commands which do the following:
+- `aws s3api list-buckets --query 'Buckets[].Name' | grep -wo "\\w*playgroundartifact\\w*" | cut -d" " -f2`: the `environment` section creates two environment variables that can be used within our Jenkins pipeline. Using these two commands we search for the artifact name and tfstate name.
 - `zip -r $UNIQUE_ANIMAL_IDENTIFIER-build-artifacts.zip build/`: compresses the build package and gets it ready to ship to the artifacts S3 bucket.
 - `aws s3 cp $UNIQUE_ANIMAL_IDENTIFIER-build-artifacts.zip s3://dpg-november-artifact-bucket`: copies the zipped up build package and sends it to the artifact bucket. Terraform will be able to then pull this down and unzip it for the deployment
 - `terraform init -backend-config="key=${UNIQUE_ANIMAL_IDENTIFIER}.tfstate`: this initializes terraform and tells terraform that we want to hold the [state](https://www.terraform.io/docs/state/index.html) in your uniqe state file.
@@ -449,7 +493,7 @@ We should now have made changes to the following files:
 - `terraform/variables.tf`
 
 Also, feel free to have a look at the files where the two variables you changed are being used...
-`
+
 - `terraform/main.tf`
 - `terraform/modules/autoscaling_group/iam.tf`
 - `terraform/modules/autoscaling_group/main.tf`
@@ -503,3 +547,17 @@ Click the link to see the deployed website!
 AWS lets you utilise resources such as [Amazon Route 53](https://www.google.com/search?q=route+53+aws&oq=route+53+aws&aqs=chrome..69i57j0l5j69i60l2.3169j0j7&sourceid=chrome&ie=UTF-8) to set up domains to your websites. Check out the link above for the documentation.
 
 Thats all for tonight! Thanks for joining, I hope you enjoyed it!
+
+### 5. Clean up
+
+Once you have finished with the playground and enjoyed seeing the running React application in your browser we need to destroy all the infrastructure that we created within AWS.
+
+Navigate back to `Dashboard` in the top left of your screen. From there you will see the three pipelines that you created:
+
+![pipeline_list](readme_images/jenkins_pipeline_list.png)
+
+Click on the `Destroy-React_App` pipeline and then select `Build with parameters` and you will see your unique identifier detailed. Hit `Build` and the pipeline will start.
+
+![confirm_pipeline_destroy](readme_images/jenkins_destroy_confirm.png)
+
+Once the pipeline has run and you have `Finished: success` the infrastructure has all been destroyed and you're good to go!
