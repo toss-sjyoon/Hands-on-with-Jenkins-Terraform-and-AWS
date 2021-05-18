@@ -17,7 +17,7 @@ pipelineJob("Deploy-React-App"){
     cpsScm {
       scm {
         git {
-          branch("master")
+          branch("main")
           remote {
             credentials("${GIT_USER}")
             url("${GIT_URL}")
@@ -42,7 +42,7 @@ pipelineJob("Destroy-React-App"){
     cpsScm {
       scm {
         git {
-          branch("master")
+          branch("main")
           remote {
             credentials("${GIT_USER}")
             url("${GIT_URL}")
